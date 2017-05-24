@@ -2,12 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	_ "github.com/go-sql-driver/mysql"
@@ -34,7 +34,8 @@ type Balls struct {
 }
 
 func init() {
-	fileName := fmt.Sprintf("%s.golang.log", program)
+	dir := os.Getenv("$OPENSHIFT_GO_LOG_DIR")
+	fileName := fmt.Sprintf("%s/%s.golang.log", dir, program)
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatalln("fail to create test.log file!")
