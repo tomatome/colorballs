@@ -12,6 +12,7 @@ import (
 	"util"
 
 	"github.com/PuerkitoBio/goquery"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
