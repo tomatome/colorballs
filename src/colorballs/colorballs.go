@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"sort"
 	"strings"
 	"time"
@@ -30,7 +31,7 @@ type Balls struct {
 	PhaseDate string
 }
 
-func parseUrlData(url string) []*Balls {
+func ParseUrlData(url string) []*Balls {
 	var b *Balls
 	BallList := make([]*Balls, 0, 400)
 
@@ -93,7 +94,7 @@ func InitPhaseDate() string {
 func Update(phaseDate string) {
 	nowDate := time.Now().Format("2006-01-02")
 	mUrl := fmt.Sprintf(url, phaseDate, nowDate)
-	ballList := parseUrlData(mUrl)
+	ballList := ParseUrlData(mUrl)
 	log.Println("[INFO] len:", len(ballList))
 	db := openDataBase()
 	for _, b := range ballList {
@@ -133,7 +134,7 @@ func GetAllBalls() []*Balls {
 	defer db.Close()
 
 	mballs := make([]*Balls, 0, 200)
-	rows, err := db.Query("SELECT * FROM golang_color_balls_table order by phase DESC")
+	rows, err := db.Query("SELECT * FROM golang_color_balls_table order by phase DESC LIMIT 20")
 	if err != nil {
 		log.Println("[ERROR] Query:", err)
 	}
@@ -217,7 +218,7 @@ func GetNewBalls() *Balls {
 	sort.Sort(bTimesSlice(blueList))
 
 	nb := new(Balls)
-	nb.BlueBall = blueList[0].name
+	nb.BlueBall = modelForecast(mballs, blueList)
 	for i, v := range redList {
 		nb.RedBalls = append(nb.RedBalls, v.name)
 		if i == 5 {
@@ -227,4 +228,26 @@ func GetNewBalls() *Balls {
 	nb.Phase = mballs[0].Phase + 1
 
 	return nb
+}
+
+func modelForecast(mballs []*Balls, blueList []*ballTimes) string {
+	//cur := mballs[0]
+	next := mballs[1]
+	num := 0
+	for _, b := range mballs {
+		num += util.Atoi(b.BlueBall)
+	}
+
+	avg := num / 30
+
+	for _, v := range blueList {
+		if util.Atoi(next.BlueBall) > avg && util.Atoi(v.name) < avg {
+			return v.name
+		} else if util.Atoi(next.BlueBall) < avg && util.Atoi(v.name) > avg {
+			return v.name
+		}
+	}
+
+	return fmt.Sprintf("%d", rand.Int63n(16-0)+0)
+
 }

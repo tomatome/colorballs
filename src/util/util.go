@@ -32,7 +32,7 @@ func Atoi(a string) int {
 	b, err := strconv.Atoi(a)
 	if err != nil {
 		log.Println("[ERROR]: Atoi ", err)
-		return -1
+		return 0
 	}
 	return b
 }
